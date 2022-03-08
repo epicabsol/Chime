@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Chime": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
