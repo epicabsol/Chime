@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Numerics;
 using OpenVR;
 using SharpDX.Direct3D11;
 
@@ -10,6 +11,12 @@ namespace Chime.Platform
 {
     public class Headset : IDisposable
     {
+        public enum Eye
+        {
+            Left,
+            Right,
+        }
+
         public CVRSystem VRSystem { get; }
         public Graphics.DeferredPipeline LeftEyePipeline { get; }
         public Graphics.DeferredPipeline RightEyePipeline { get; }
@@ -25,6 +32,8 @@ namespace Chime.Platform
             uint height = 0;
             this.VRSystem.GetRecommendedRenderTargetSize(ref width, ref height);
             System.Diagnostics.Debug.WriteLine($"[INFO]: Headset recommends using a render target with size {width}x{height}.");
+
+            // TODO: Implement instanced stereo rendering (see https://docs.microsoft.com/en-us/windows/mixed-reality/develop/native/rendering-in-directx)
 
             // Create the eye pipelines
             Texture2DDescription eyeBackbufferDescription = new Texture2DDescription()
@@ -46,18 +55,19 @@ namespace Chime.Platform
             this.RightEyePipeline = new Graphics.DeferredPipeline(rightBackbuffer, (int)width, (int)height);
         }
 
-        public void UpdatePose()
+        public void UpdatePose(out Vector3 deviceTranslation, out Quaternion deviceRotation)
         {
             Span<TrackedDevicePose_t> renderPoses = stackalloc TrackedDevicePose_t[1];
             Span<TrackedDevicePose_t> gamePoses = stackalloc TrackedDevicePose_t[1];
             OpenVR.OpenVR.Compositor.WaitGetPoses(renderPoses, gamePoses);
+            Matrix4x4.Decompose(((Matrix4x4)renderPoses[0].mDeviceToAbsoluteTracking), out _, out deviceRotation, out deviceTranslation);
         }
 
-        public void PresentEye(bool leftEye)
+        public void PresentEyes()
         {
             Texture_t eyeTexture = new Texture_t()
             {
-                handle = (leftEye ? this.LeftEyePipeline.Backbuffer : this.RightEyePipeline.Backbuffer).NativePointer,
+                handle = this.LeftEyePipeline.Backbuffer.NativePointer,
                 eType = ETextureType.DirectX,
                 eColorSpace = EColorSpace.Auto
             };
@@ -68,7 +78,19 @@ namespace Chime.Platform
                 vMin = 0.0f,
                 vMax = 1.0f,
             };
-            EVRCompositorError result = OpenVR.OpenVR.Compositor.Submit(leftEye ? EVREye.Eye_Left : EVREye.Eye_Right, ref eyeTexture, ref eyeTextureBounds, EVRSubmitFlags.Submit_Default);
+            EVRCompositorError result = OpenVR.OpenVR.Compositor.Submit(EVREye.Eye_Left, ref eyeTexture, ref eyeTextureBounds, EVRSubmitFlags.Submit_Default);
+            eyeTexture.handle = this.RightEyePipeline.Backbuffer.NativePointer;
+            result = OpenVR.OpenVR.Compositor.Submit(EVREye.Eye_Right, ref eyeTexture, ref eyeTextureBounds, EVRSubmitFlags.Submit_Default);
+        }
+
+        public void GetEyeProjection(Eye eye, float nearClip, float farClip, out Matrix4x4 projection)
+        {
+            projection = Matrix4x4.Transpose(OpenVR.OpenVR.System.GetProjectionMatrix(eye == Eye.Left ? EVREye.Eye_Left : EVREye.Eye_Right, nearClip, farClip));
+        }
+
+        public void GetEyeTransform(Eye eye, out Vector3 translation, out Quaternion rotation)
+        {
+            Matrix4x4.Decompose(OpenVR.OpenVR.System.GetEyeToHeadTransform(eye == Eye.Left ? EVREye.Eye_Left : EVREye.Eye_Right), out _, out rotation, out translation);
         }
 
         public void Dispose()

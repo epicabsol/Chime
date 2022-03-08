@@ -6,6 +6,7 @@
 //
 //=============================================================================
 #if !OPENVR_XR_API
+#nullable disable warnings
 
 using System;
 using System.Runtime.InteropServices;
@@ -5902,7 +5903,7 @@ public enum EBlockQueueReadType
 
 [StructLayout(LayoutKind.Sequential)] public struct HmdMatrix34_t
 {
-	public float m0; //float[3][4]
+	public float m0;
 	public float m1;
 	public float m2;
 	public float m3;
@@ -5914,42 +5915,12 @@ public enum EBlockQueueReadType
 	public float m9;
 	public float m10;
 	public float m11;
-#if UNITY_5_3_OR_NEWER
 
-	public Vector3 GetPosition()
+	public static implicit operator System.Numerics.Matrix4x4(HmdMatrix34_t m)
 	{
-		return new Vector3(m3, m7, -m11);
+		// TODO: Optimize this
+		return System.Numerics.Matrix4x4.Transpose(new System.Numerics.Matrix4x4(m.m0, m.m1, m.m2, m.m3, m.m4, m.m5, m.m6, m.m7, m.m8, m.m9, m.m10, m.m11, 0.0f, 0.0f, 0.0f, 1.0f));
 	}
-
-	public bool IsRotationValid()
-	{
-		return ((m2 != 0 || m6 != 0 || m10 != 0) && (m1 != 0 || m5 != 0 || m9 != 0));
-	}
-
-	public Quaternion GetRotation()
-	{
-		if (IsRotationValid())
-		{
-			float w = Mathf.Sqrt(Mathf.Max(0, 1 + m0 + m5 + m10)) / 2;
-			float x = Mathf.Sqrt(Mathf.Max(0, 1 + m0 - m5 - m10)) / 2;
-			float y = Mathf.Sqrt(Mathf.Max(0, 1 - m0 + m5 - m10)) / 2;
-			float z = Mathf.Sqrt(Mathf.Max(0, 1 - m0 - m5 + m10)) / 2;
-
-			_copysign(ref x, -m9 - -m6);
-			_copysign(ref y, -m2 - -m8);
-			_copysign(ref z, m4 - m1);
-
-			return new Quaternion(x, y, z, w);
-		}
-		return Quaternion.identity;
-	}
-
-	private static void _copysign(ref float sizeval, float signval)
-	{
-		if (signval > 0 != sizeval > 0)
-			sizeval = -sizeval;
-	}
-#endif
 }
 [StructLayout(LayoutKind.Sequential)] public struct HmdMatrix33_t
 {
@@ -5981,6 +5952,11 @@ public enum EBlockQueueReadType
 	public float m13;
 	public float m14;
 	public float m15;
+
+	public static implicit operator System.Numerics.Matrix4x4(HmdMatrix44_t m)
+    {
+		return new System.Numerics.Matrix4x4(m.m0, m.m1, m.m2, m.m3, m.m4, m.m5, m.m6, m.m7, m.m8, m.m9, m.m10, m.m11, m.m12, m.m13, m.m14, m.m15);
+    }
 }
 [StructLayout(LayoutKind.Sequential)] public struct HmdVector3_t
 {
@@ -8273,5 +8249,7 @@ public class OpenVR
 
 
 }
+
+#nullable restore warnings
 #endif
 

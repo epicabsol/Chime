@@ -13,6 +13,8 @@ namespace Chime.Graphics
         public Device Device { get; }
         public DeviceContext ImmediateContext { get; }
 
+        public Shaders Shaders { get; }
+
         public Renderer()
         {
             DeviceCreationFlags flags = DeviceCreationFlags.None;
@@ -21,6 +23,7 @@ namespace Chime.Graphics
 #endif
             this.Device = new Device(SharpDX.Direct3D.DriverType.Hardware, flags);
             this.ImmediateContext = this.Device.ImmediateContext;
+            this.Shaders = new Shaders();
         }
 
         public void Dispose()

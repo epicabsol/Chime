@@ -8,6 +8,9 @@ namespace Chime
         public static Platform.Application? Application { get; private set; }
         public static Platform.Window? Window { get; private set; }
         public static Platform.Headset? Headset { get; private set; }
+        public static Scene.Scene? Scene { get; private set; }
+        public static Scene.Camera? DesktopCamera { get; private set; }
+        public static Scene.VRPlayer? VRPlayer { get; private set; }
 
         public static void Main(string[] args)
         {
@@ -21,6 +24,22 @@ namespace Chime
                     Program.Window.Closed += (s, e) => Program.Application.Stop(0);
                     Program.Application.Tick += Application_Tick;
 
+                    Program.Scene = new Scene.Scene();
+                    Program.DesktopCamera = new Scene.PerspectiveCamera(1.0f, (float)Program.Window.Pipeline.Width / Program.Window.Pipeline.Height, 0.1f, 1000.0f, "Desktop Camera");
+                    Program.DesktopCamera.Position = new System.Numerics.Vector3(0.0f, 5.0f, 8.0f);
+                    Program.DesktopCamera.Rotation = System.Numerics.Quaternion.CreateFromAxisAngle(System.Numerics.Vector3.UnitY, 0.5f) * System.Numerics.Quaternion.CreateFromAxisAngle(System.Numerics.Vector3.UnitX, -0.5f);
+                    Program.Scene.AddChild(Program.DesktopCamera);
+
+                    if (Program.Headset != null)
+                    {
+                        Program.VRPlayer = new Scene.VRPlayer("VR Player");
+                        Program.Scene.AddChild(Program.VRPlayer);
+                        Program.VRPlayer.LeftEye.AddChild(new Scene.Grid(false) { Scale = System.Numerics.Vector3.One * 0.1f });
+                        Program.VRPlayer.RightEye.AddChild(new Scene.Grid(false) { Scale = System.Numerics.Vector3.One * 0.1f });
+                    }
+
+                    Program.Scene.AddChild(new Scene.Grid(true, "Test Grid"));
+
                     Program.Application.Run();
 
                 }
@@ -33,19 +52,22 @@ namespace Chime
 
         private static void Application_Tick(object? sender, Platform.TickEventArgs e)
         {
-            if (Program.Renderer == null || Program.Window == null)
+            if (Program.Renderer == null || Program.Window == null || Program.Scene == null || Program.DesktopCamera == null)
                 return;
 
-            Program.Renderer.ImmediateContext.ClearRenderTargetView(Program.Window.Pipeline.BackbufferRTV, new SharpDX.Mathematics.Interop.RawColor4(1.0f, 0.0f, 0.0f, 1.0f));
+            Program.Scene.Update(e.DeltaTime);
+
+            Program.Scene.Render(Program.Window.Pipeline, Program.DesktopCamera);
             Program.Window.SwapChain.Present(0, SharpDX.DXGI.PresentFlags.None);
 
-            if (Program.Headset != null)
+            if (Program.Headset != null && Program.VRPlayer != null)
             {
-                Program.Headset.UpdatePose();
-                Program.Renderer.ImmediateContext.ClearRenderTargetView(Program.Headset.LeftEyePipeline.BackbufferRTV, new SharpDX.Mathematics.Interop.RawColor4(0.0f, 1.0f, 0.0f, 1.0f));
-                Program.Renderer.ImmediateContext.ClearRenderTargetView(Program.Headset.RightEyePipeline.BackbufferRTV, new SharpDX.Mathematics.Interop.RawColor4(0.0f, 0.0f, 1.0f, 1.0f));
-                Program.Headset.PresentEye(true);
-                Program.Headset.PresentEye(false);
+                Program.Headset.UpdatePose(out System.Numerics.Vector3 headsetPosition, out System.Numerics.Quaternion headsetRotation);
+                Program.VRPlayer.Position = headsetPosition;
+                Program.VRPlayer.Rotation = headsetRotation;
+                Program.Scene.Render(Program.Headset.LeftEyePipeline, Program.VRPlayer.LeftEye);
+                Program.Scene.Render(Program.Headset.RightEyePipeline, Program.VRPlayer.RightEye);
+                Program.Headset.PresentEyes();
             }
         }
     }
