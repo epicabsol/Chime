@@ -18,9 +18,14 @@ namespace Chime.Platform
 
         public event EventHandler<EventArgs>? Closed;
 
+        // HACK: We need the garbage collector to not collect this delegate that we assign to the window class
+        // (thanks https://stackoverflow.com/a/64419394)
+        private PInvoke.User32.WndProc WndProc { get; }
+
         public Window(Graphics.Renderer renderer, string caption)
         {
             IntPtr instanceHandle = GetModuleHandle(IntPtr.Zero);
+            this.WndProc = this.WindowProc;
 
             // Register the window class if we haven't already
             if (Interlocked.CompareExchange(ref HasRegisteredWindowClass, 1, 0) == 0)
@@ -29,7 +34,7 @@ namespace Chime.Platform
                 {
                     PInvoke.User32.WNDCLASS windowClass = new PInvoke.User32.WNDCLASS
                     {
-                        lpfnWndProc = this.WindowProc,
+                        lpfnWndProc = this.WndProc,
                         hInstance = instanceHandle,
                         lpszClassName = windowClassBytes,
                         hCursor = PInvoke.User32.LoadCursor(IntPtr.Zero, (IntPtr)PInvoke.User32.Cursors.IDC_ARROW).DangerousGetHandle()

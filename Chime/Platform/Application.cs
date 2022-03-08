@@ -16,12 +16,14 @@ namespace Chime.Platform
 
     public class Application
     {
-
+        [DllImport("kernel32", CharSet = CharSet.Unicode)]
+        private static extern IntPtr AddDllDirectory(string path);
         public event EventHandler<TickEventArgs>? Tick;
 
         public Application()
         {
-            
+            string thirdPartyDirectory = Path.Combine(Directory.GetCurrentDirectory(), "ThirdParty");
+            AddDllDirectory(thirdPartyDirectory);
         }
 
         public unsafe int Run()
@@ -57,7 +59,6 @@ namespace Chime.Platform
                 float deltaTime = (float)stopwatch.Elapsed.TotalSeconds;
                 stopwatch.Restart();
                 this.Tick?.Invoke(this, new TickEventArgs(deltaTime));
-                System.Threading.Thread.Sleep(20);
             }
 
             return exitCode;

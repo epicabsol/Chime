@@ -14,4 +14,17 @@
     <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="openvr_api.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="openvr_api.pdb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Scene\" />
+  </ItemGroup>
+
 </Project>
