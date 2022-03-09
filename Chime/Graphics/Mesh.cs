@@ -9,8 +9,10 @@ namespace Chime.Graphics
 {
     public class Mesh<TVertex> : IDisposable where TVertex : unmanaged
     {
+        public TVertex[] Vertices { get; }
         public SharpDX.Direct3D11.Buffer VertexBuffer { get; }
         public uint VertexCount { get; }
+        public uint[] Indices { get; }
         public SharpDX.Direct3D11.Buffer IndexBuffer { get; }
         public uint IndexCount { get; }
 
@@ -24,6 +26,10 @@ namespace Chime.Graphics
                 this.VertexBuffer = new SharpDX.Direct3D11.Buffer(device, (IntPtr)vertexPointer, new BufferDescription(System.Runtime.InteropServices.Marshal.SizeOf<TVertex>() * vertices.Length, BindFlags.VertexBuffer, ResourceUsage.Immutable));
                 this.IndexBuffer = new SharpDX.Direct3D11.Buffer(device, (IntPtr)indexPointer, new BufferDescription(sizeof(uint) * indices.Length, BindFlags.IndexBuffer, ResourceUsage.Immutable));
             }
+            this.Vertices = new TVertex[vertices.Length];
+            vertices.CopyTo(this.Vertices);
+            this.Indices = new uint[indices.Length];
+            indices.CopyTo(this.Indices);
         }
 
         public void Dispose()

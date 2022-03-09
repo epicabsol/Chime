@@ -9,7 +9,7 @@ using SharpDX.Direct3D11;
 
 namespace Chime.Platform
 {
-    public class Headset : IDisposable
+    public class Headset : TrackedDevice, IDisposable
     {
         public enum Eye
         {
@@ -17,20 +17,23 @@ namespace Chime.Platform
             Right,
         }
 
-        public CVRSystem VRSystem { get; }
         public Graphics.DeferredPipeline LeftEyePipeline { get; }
         public Graphics.DeferredPipeline RightEyePipeline { get; }
 
-        private Headset(CVRSystem vrSystem)
+        public override string DisplayName => "VR Headset";
+
+        private TrackedDevice?[] TrackedDevices { get; } = new TrackedDevice?[OpenVR.OpenVR.k_unMaxTrackedDeviceCount];
+
+        public IEnumerable<TrackedDevice> ConnectedDevices => this.TrackedDevices.Where(device => device != null).Select(device => device!);
+
+        private Headset() : base(OpenVR.OpenVR.k_unTrackedDeviceIndex_Hmd)
         {
             if (Program.Renderer == null)
                 throw new NullReferenceException();
 
-            this.VRSystem = vrSystem;
-
             uint width = 0;
             uint height = 0;
-            this.VRSystem.GetRecommendedRenderTargetSize(ref width, ref height);
+            OpenVR.OpenVR.System.GetRecommendedRenderTargetSize(ref width, ref height);
             System.Diagnostics.Debug.WriteLine($"[INFO]: Headset recommends using a render target with size {width}x{height}.");
 
             // TODO: Implement instanced stereo rendering (see https://docs.microsoft.com/en-us/windows/mixed-reality/develop/native/rendering-in-directx)
@@ -53,15 +56,22 @@ namespace Chime.Platform
             this.LeftEyePipeline = new Graphics.DeferredPipeline(leftBackbuffer, (int)width, (int)height);
             Texture2D rightBackbuffer = new Texture2D(Program.Renderer.Device, eyeBackbufferDescription);
             this.RightEyePipeline = new Graphics.DeferredPipeline(rightBackbuffer, (int)width, (int)height);
+
+            // Loop through each tracked device slot checking for active devices
+            for (uint i = 0; i < OpenVR.OpenVR.k_unMaxTrackedDeviceCount; i++)
+            {
+                this.RefreshDeviceSlot(i);
+            }
+            this.TrackedDevices[this.VRDeviceIndex] = this;
         }
 
-        public void UpdatePose(out Vector3 deviceTranslation, out Quaternion deviceRotation)
+        /*public void UpdatePose(out Vector3 deviceTranslation, out Quaternion deviceRotation)
         {
             Span<TrackedDevicePose_t> renderPoses = stackalloc TrackedDevicePose_t[1];
             Span<TrackedDevicePose_t> gamePoses = stackalloc TrackedDevicePose_t[1];
             OpenVR.OpenVR.Compositor.WaitGetPoses(renderPoses, gamePoses);
             Matrix4x4.Decompose(((Matrix4x4)renderPoses[0].mDeviceToAbsoluteTracking), out _, out deviceRotation, out deviceTranslation);
-        }
+        }*/
 
         public void PresentEyes()
         {
@@ -91,6 +101,122 @@ namespace Chime.Platform
         public void GetEyeTransform(Eye eye, out Vector3 translation, out Quaternion rotation)
         {
             Matrix4x4.Decompose(OpenVR.OpenVR.System.GetEyeToHeadTransform(eye == Eye.Left ? EVREye.Eye_Left : EVREye.Eye_Right), out _, out rotation, out translation);
+        }
+
+        // These large-ish arrays are only used within this function, but we don't want to be allocating them every single time we go through here
+        private static TrackedDevicePose_t[] _deviceRenderPoses = new TrackedDevicePose_t[(int)OpenVR.OpenVR.k_unMaxTrackedDeviceCount];
+        private static TrackedDevicePose_t[] _deviceGamePoses = new TrackedDevicePose_t[(int)OpenVR.OpenVR.k_unMaxTrackedDeviceCount];
+        public void GetVRInput()
+        {
+            // Handle VR events
+            VREvent_t eventInfo = new VREvent_t();
+            while (OpenVR.OpenVR.System.PollNextEvent(ref eventInfo, (uint)System.Runtime.InteropServices.Marshal.SizeOf<VREvent_t>()))
+            {
+                double eventTime = Program.Application!.ApplicationTime;
+                System.Diagnostics.Debug.WriteLine($"VR Event: {eventInfo.eventType} for device {eventInfo.trackedDeviceIndex}");
+
+                if (eventInfo.trackedDeviceIndex == OpenVR.OpenVR.k_unTrackedDeviceIndexInvalid)
+                {
+                    // System event - we don't care about these at this point
+                    System.Diagnostics.Debug.WriteLine($"[WARNING]: OpenVR event to system was ignored.");
+                }
+                else
+                {
+                    switch (eventInfo.eventType)
+                    {
+                        case EVREventType.VREvent_TrackedDeviceActivated:
+                            this.RefreshDeviceSlot(eventInfo.trackedDeviceIndex);
+                            continue;
+                        case EVREventType.VREvent_TrackedDeviceDeactivated:
+                        {
+                            if (this.TrackedDevices[eventInfo.trackedDeviceIndex] is TrackedDevice device)
+                            {
+                                device.Remove();
+                                Program.InputDevices.Remove(device);
+                                this.TrackedDevices[eventInfo.trackedDeviceIndex] = null;
+                            }
+                            continue;
+                        }
+                        default:
+                        {
+                            if (this.TrackedDevices[eventInfo.trackedDeviceIndex] is TrackedDevice device)
+                            {
+                                device.HandleVREvent(eventInfo, eventTime - eventInfo.eventAgeSeconds);
+                            }
+                            else
+                            {
+                                System.Diagnostics.Debug.WriteLine($"[WARNING]: OpenVR sent event {eventInfo.eventType} to unknown device {eventInfo.trackedDeviceIndex}! Ignoring.");
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Update the pose of tracked devices
+            /*Span<TrackedDevicePose_t> devicePoses = stackalloc TrackedDevicePose_t[(int)OpenVR.OpenVR.k_unMaxTrackedDeviceCount];
+            
+            OpenVR.OpenVR.System.GetDeviceToAbsoluteTrackingPose(ETrackingUniverseOrigin.TrackingUniverseSeated, 0.0f, devicePoses);
+            double time = Program.Application!.ApplicationTime;
+            for (int i = 0; i < this.TrackedDevices.Length; i++)
+            {
+                if (this.TrackedDevices[i] is TrackedDevice device)
+                {
+                    device.TrackedTransform.ChangeValue(devicePoses[i].mDeviceToAbsoluteTracking, time, true);
+                }
+            }*/
+            OpenVR.OpenVR.Compositor.WaitGetPoses(Headset._deviceRenderPoses, Headset._deviceGamePoses);
+            double time = Program.Application!.ApplicationTime;
+            for (int i = 0; i < this.TrackedDevices.Length; i++)
+            {
+                if (this.TrackedDevices[i] is TrackedDevice device)
+                {
+                    device.UpdateTransform(Headset._deviceRenderPoses[i].mDeviceToAbsoluteTracking, time);
+                }
+                // Also update the axes of the controllers
+                if (this.TrackedDevices[i] is MotionController controller)
+                {
+                    controller.PollAxes();
+                }
+            }
+        }
+
+        private void RefreshDeviceSlot(uint deviceIndex)
+        {
+            if (this.TrackedDevices[deviceIndex] is TrackedDevice device)
+            {
+                device.Remove();
+                Program.InputDevices.Remove(device);
+                this.TrackedDevices[deviceIndex] = null;
+            }
+
+            switch (OpenVR.OpenVR.System.GetTrackedDeviceClass(deviceIndex))
+            {
+                case ETrackedDeviceClass.HMD:
+                    if (deviceIndex == OpenVR.OpenVR.k_unTrackedDeviceIndex_Hmd)
+                    {
+                        this.TrackedDevices[deviceIndex] = this;
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[WARNING]: OpenVR reported a VR heaset with non-zero device index {deviceIndex}! Ignoring.");
+                    }
+                    break;
+                case ETrackedDeviceClass.Controller:
+                    ETrackedControllerRole controllerRole = OpenVR.OpenVR.System.GetControllerRoleForTrackedDeviceIndex(deviceIndex);
+                    if (controllerRole == ETrackedControllerRole.LeftHand || controllerRole == ETrackedControllerRole.RightHand)
+                    {
+                        MotionController controller = new MotionController(deviceIndex, controllerRole == ETrackedControllerRole.LeftHand ? MotionControllerHand.Left : MotionControllerHand.Right);
+                        this.TrackedDevices[deviceIndex] = controller;
+                        Program.InputDevices.Add(controller);
+                    }
+                    break;
+                case ETrackedDeviceClass.GenericTracker:
+                    TrackedDevice trackedDevice = new TrackedDevice(deviceIndex);
+                    this.TrackedDevices[deviceIndex] = trackedDevice;
+                    Program.InputDevices.Add(trackedDevice);
+                    break;
+            }
         }
 
         public void Dispose()
@@ -126,7 +252,7 @@ namespace Chime.Platform
                 return null;
             }
 
-            return new Headset(vrSystem);
+            return new Headset();
         }
     }
 }

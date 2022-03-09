@@ -20,10 +20,15 @@ namespace Chime.Platform
         private static extern IntPtr AddDllDirectory(string path);
         public event EventHandler<TickEventArgs>? Tick;
 
+        private System.Diagnostics.Stopwatch ApplicationStopwatch { get; } = new System.Diagnostics.Stopwatch();
+        public double ApplicationTime => this.ApplicationStopwatch.Elapsed.TotalSeconds;
+
         public Application()
         {
             string thirdPartyDirectory = Path.Combine(Directory.GetCurrentDirectory(), "ThirdParty");
             AddDllDirectory(thirdPartyDirectory);
+
+            this.ApplicationStopwatch.Start();
         }
 
         public unsafe int Run()

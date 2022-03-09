@@ -12,6 +12,8 @@ namespace Chime
         public static Scene.Camera? DesktopCamera { get; private set; }
         public static Scene.VRPlayer? VRPlayer { get; private set; }
 
+        public static List<Input.InputDevice> InputDevices { get; } = new List<Input.InputDevice>();
+
         public static void Main(string[] args)
         {
             using (Program.Renderer = new Graphics.Renderer())
@@ -32,7 +34,9 @@ namespace Chime
 
                     if (Program.Headset != null)
                     {
-                        Program.VRPlayer = new Scene.VRPlayer("VR Player");
+                        Program.InputDevices.Add(Program.Headset);
+
+                        Program.VRPlayer = new Scene.VRPlayer(Program.Headset, "VR Player");
                         Program.Scene.AddChild(Program.VRPlayer);
                         Program.VRPlayer.LeftEye.AddChild(new Scene.Grid(false) { Scale = System.Numerics.Vector3.One * 0.1f });
                         Program.VRPlayer.RightEye.AddChild(new Scene.Grid(false) { Scale = System.Numerics.Vector3.One * 0.1f });
@@ -55,6 +59,13 @@ namespace Chime
             if (Program.Renderer == null || Program.Window == null || Program.Scene == null || Program.DesktopCamera == null)
                 return;
 
+            Program.Headset?.GetVRInput();
+            
+            foreach (Input.InputDevice device in Program.InputDevices)
+            {
+                device.ProcessEvents();
+            }
+
             Program.Scene.Update(e.DeltaTime);
 
             Program.Scene.Render(Program.Window.Pipeline, Program.DesktopCamera);
@@ -62,9 +73,6 @@ namespace Chime
 
             if (Program.Headset != null && Program.VRPlayer != null)
             {
-                Program.Headset.UpdatePose(out System.Numerics.Vector3 headsetPosition, out System.Numerics.Quaternion headsetRotation);
-                Program.VRPlayer.Position = headsetPosition;
-                Program.VRPlayer.Rotation = headsetRotation;
                 Program.Scene.Render(Program.Headset.LeftEyePipeline, Program.VRPlayer.LeftEye);
                 Program.Scene.Render(Program.Headset.RightEyePipeline, Program.VRPlayer.RightEye);
                 Program.Headset.PresentEyes();

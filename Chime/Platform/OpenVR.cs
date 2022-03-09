@@ -4888,7 +4888,7 @@ public enum EVRState
 	Standby = 6,
 	Ready_Alert_Low = 7,
 }
-public enum EVREventType
+public enum EVREventType : uint
 {
 	VREvent_None = 0,
 	VREvent_TrackedDeviceActivated = 100,
@@ -6285,7 +6285,7 @@ public enum EBlockQueueReadType
 }
 [StructLayout(LayoutKind.Sequential)] public struct VREvent_t
 {
-	public uint eventType;
+	public EVREventType eventType;
 	public uint trackedDeviceIndex;
 	public float eventAgeSeconds;
 	public VREvent_Data_t data;
@@ -6293,7 +6293,7 @@ public enum EBlockQueueReadType
 // This structure is for backwards binary compatibility on Linux and OSX only
 [StructLayout(LayoutKind.Sequential, Pack = 4)] public struct VREvent_t_Packed
 {
-	public uint eventType;
+	public EVREventType eventType;
 	public uint trackedDeviceIndex;
 	public float eventAgeSeconds;
 	public VREvent_Data_t data;
