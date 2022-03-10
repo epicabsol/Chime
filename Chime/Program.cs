@@ -28,7 +28,7 @@ namespace Chime
 
                     Program.Scene = new Scene.Scene();
                     Program.DesktopCamera = new Scene.PerspectiveCamera(1.0f, (float)Program.Window.Pipeline.Width / Program.Window.Pipeline.Height, 0.1f, 1000.0f, "Desktop Camera");
-                    Program.DesktopCamera.Position = new System.Numerics.Vector3(0.0f, 5.0f, 8.0f);
+                    Program.DesktopCamera.Position = new System.Numerics.Vector3(1.0f, 2.0f, 2.0f);
                     Program.DesktopCamera.Rotation = System.Numerics.Quaternion.CreateFromAxisAngle(System.Numerics.Vector3.UnitY, 0.5f) * System.Numerics.Quaternion.CreateFromAxisAngle(System.Numerics.Vector3.UnitX, -0.5f);
                     Program.Scene.AddChild(Program.DesktopCamera);
 
@@ -38,8 +38,8 @@ namespace Chime
 
                         Program.VRPlayer = new Scene.VRPlayer(Program.Headset, "VR Player");
                         Program.Scene.AddChild(Program.VRPlayer);
-                        Program.VRPlayer.LeftEye.AddChild(new Scene.Grid(false) { Scale = System.Numerics.Vector3.One * 0.1f });
-                        Program.VRPlayer.RightEye.AddChild(new Scene.Grid(false) { Scale = System.Numerics.Vector3.One * 0.1f });
+                        //Program.VRPlayer.LeftEye.AddChild(new Scene.Grid(false) { Scale = System.Numerics.Vector3.One * 0.1f });
+                        //Program.VRPlayer.RightEye.AddChild(new Scene.Grid(false) { Scale = System.Numerics.Vector3.One * 0.1f });
                     }
 
                     Program.Scene.AddChild(new Scene.Grid(true, "Test Grid"));

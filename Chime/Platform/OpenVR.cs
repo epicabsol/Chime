@@ -5963,6 +5963,11 @@ public enum EBlockQueueReadType
 	public float v0; //float[3]
 	public float v1;
 	public float v2;
+
+	public static implicit operator System.Numerics.Vector3(HmdVector3_t v)
+    {
+		return new System.Numerics.Vector3(v.v0, v.v1, v.v2);
+    }
 }
 [StructLayout(LayoutKind.Sequential)] public struct HmdVector4_t
 {
@@ -5970,6 +5975,11 @@ public enum EBlockQueueReadType
 	public float v1;
 	public float v2;
 	public float v3;
+
+	public static implicit operator System.Numerics.Vector4(HmdVector4_t v)
+    {
+		return new System.Numerics.Vector4(v.v0, v.v1, v.v2, v.v3);
+    }
 }
 [StructLayout(LayoutKind.Sequential)] public struct HmdVector3d_t
 {

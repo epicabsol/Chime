@@ -96,6 +96,17 @@ namespace Chime.Platform
             }
         }
 
+        public Graphics.StaticModel? LoadModel()
+        {
+            string? modelName = this.GetStringProperty(ETrackedDeviceProperty.Prop_RenderModelName_String);
+            if (modelName == null)
+            {
+                return null;
+            }
+
+            return Program.Headset!.LoadRenderModel(modelName);
+        }
+
         public override void HandleVREvent(VREvent_t vrEvent, double applicationTime)
         {
             switch (vrEvent.eventType)

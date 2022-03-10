@@ -12,13 +12,19 @@ namespace Chime.Graphics
         private const string VertexEntrypoint = "VS_Main";
         private const string PixelEntrypoint = "PS_Main";
 
-        public byte[] SolidColorShaderPS { get; }
         public byte[] SolidColorShaderVS { get; }
+        public byte[] SolidColorShaderPS { get; }
+
+        public byte[] GBufferShaderVS { get; }
+        public byte[] GBufferShaderPS { get; }
 
         public Shaders()
         {
             this.SolidColorShaderVS = Shaders.CompileShader(Chime.Properties.Resources.SolidColorShader, VertexEntrypoint);
             this.SolidColorShaderPS = Shaders.CompileShader(Chime.Properties.Resources.SolidColorShader, PixelEntrypoint);
+
+            this.GBufferShaderVS = Shaders.CompileShader(Chime.Properties.Resources.GBufferShader, VertexEntrypoint);
+            this.GBufferShaderPS = Shaders.CompileShader(Chime.Properties.Resources.GBufferShader, PixelEntrypoint);
         }
 
         private static byte[] CompileShader(byte[] source, string entrypoint)

@@ -94,6 +94,38 @@ namespace Chime.Platform
 
         }
 
+        public string? GetStringProperty(OpenVR.ETrackedDeviceProperty property)
+        {
+            StringBuilder builder = new StringBuilder(1000);
+            OpenVR.ETrackedPropertyError error = OpenVR.ETrackedPropertyError.TrackedProp_Success;
+            uint stringLength = OpenVR.OpenVR.System.GetStringTrackedDeviceProperty(this.VRDeviceIndex, property, builder, (uint)builder.Capacity, ref error);
+            if (error == OpenVR.ETrackedPropertyError.TrackedProp_Success)
+            {
+                return builder.ToString();
+            }
+            else if (error == OpenVR.ETrackedPropertyError.TrackedProp_ValueNotProvidedByDevice)
+            {
+                return null;
+            }
+            else if (error == OpenVR.ETrackedPropertyError.TrackedProp_BufferTooSmall)
+            {
+                builder.EnsureCapacity((int)stringLength);
+                stringLength = OpenVR.OpenVR.System.GetStringTrackedDeviceProperty(this.VRDeviceIndex, property, builder, (uint)builder.Capacity, ref error);
+                if (error == OpenVR.ETrackedPropertyError.TrackedProp_Success)
+                {
+                    return builder.ToString();
+                }
+                else
+                {
+                    throw new Exception($"Failed to get property {property} because {error}!");
+                }
+            }
+            else
+            {
+                throw new Exception($"Failed to get property {property} because {error}!");
+            }
+        }
+
         public void UpdateTransform(Matrix4x4 newTransform, double applicationTime)
         {
             this.QueueTransformEvent(this.TrackedTransform, newTransform, applicationTime);

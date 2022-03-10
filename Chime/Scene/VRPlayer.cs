@@ -14,8 +14,8 @@ namespace Chime.Scene
         public VREyeCamera LeftEye { get; }
         public VREyeCamera RightEye { get; }
 
-        public VRPlayerController LeftController { get; }
-        public VRPlayerController RightController { get; }
+        public VRPlayerController? LeftController { get; }
+        public VRPlayerController? RightController { get; }
         public IReadOnlyList<VRPlayerController> Controllers { get; }
 
         public VRPlayer(Platform.Headset headset, string? name = null) : base(name)

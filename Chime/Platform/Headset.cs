@@ -219,6 +219,47 @@ namespace Chime.Platform
             }
         }
 
+        public unsafe Graphics.StaticModel LoadRenderModel(string modelName)
+        {
+            EVRRenderModelError error = EVRRenderModelError.Loading;
+
+            IntPtr modelPointer = IntPtr.Zero;
+            while (error == EVRRenderModelError.Loading)
+            {
+                error = OpenVR.OpenVR.RenderModels.LoadRenderModel_Async(modelName, ref modelPointer);
+            }
+
+            if (error == EVRRenderModelError.None)
+            {
+                RenderModel_t model = *(RenderModel_t*)modelPointer;
+                Span<RenderModel_Vertex_t> vertices = new Span<RenderModel_Vertex_t>((void*)model.rVertexData, (int)model.unVertexCount);
+                Span<ushort> indices = new Span<ushort>((void*)model.rIndexData, (int)model.unTriangleCount * 3);
+
+                Graphics.StaticModelVertex[] modelVertices = new Graphics.StaticModelVertex[model.unVertexCount];
+                uint[] modelIndices = new uint[model.unTriangleCount * 3];
+                for (int i = 0; i < model.unVertexCount; i++)
+                {
+                    modelVertices[i].Position = vertices[i].vPosition;
+                    modelVertices[i].Normal = vertices[i].vNormal;
+                    modelVertices[i].TexCoord = new Vector2(vertices[i].rfTextureCoord0, vertices[i].rfTextureCoord1);
+                }
+                for (int i = 0; i < model.unTriangleCount * 3; i++)
+                {
+                    modelIndices[i] = indices[i];
+                }
+
+                Graphics.StaticModelSection section = new Graphics.StaticModelSection(new Graphics.Mesh<Graphics.StaticModelVertex>(Program.Renderer!.Device, modelVertices, modelIndices), new Graphics.Material(null, Vector3.One));
+
+                OpenVR.OpenVR.RenderModels.FreeRenderModel(modelPointer);
+
+                return new Graphics.StaticModel(new Graphics.StaticModelSection[] { section });
+            }
+            else
+            {
+                throw new Exception($"Model load error is {error}!");
+            }
+        }
+
         public void Dispose()
         {
             this.RightEyePipeline.Dispose();
