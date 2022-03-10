@@ -113,7 +113,7 @@ namespace Chime.Platform
             while (OpenVR.OpenVR.System.PollNextEvent(ref eventInfo, (uint)System.Runtime.InteropServices.Marshal.SizeOf<VREvent_t>()))
             {
                 double eventTime = Program.Application!.ApplicationTime;
-                System.Diagnostics.Debug.WriteLine($"VR Event: {eventInfo.eventType} for device {eventInfo.trackedDeviceIndex}");
+                //System.Diagnostics.Debug.WriteLine($"VR Event: {eventInfo.eventType} for device {eventInfo.trackedDeviceIndex}");
 
                 if (eventInfo.trackedDeviceIndex == OpenVR.OpenVR.k_unTrackedDeviceIndexInvalid)
                 {
@@ -206,7 +206,7 @@ namespace Chime.Platform
                     ETrackedControllerRole controllerRole = OpenVR.OpenVR.System.GetControllerRoleForTrackedDeviceIndex(deviceIndex);
                     if (controllerRole == ETrackedControllerRole.LeftHand || controllerRole == ETrackedControllerRole.RightHand)
                     {
-                        MotionController controller = new MotionController(deviceIndex, controllerRole == ETrackedControllerRole.LeftHand ? MotionControllerHand.Left : MotionControllerHand.Right);
+                        MotionController controller = new MotionController(this, deviceIndex, controllerRole == ETrackedControllerRole.LeftHand ? MotionControllerHand.Left : MotionControllerHand.Right);
                         this.TrackedDevices[deviceIndex] = controller;
                         Program.InputDevices.Add(controller);
                     }

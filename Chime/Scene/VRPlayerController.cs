@@ -11,12 +11,10 @@ namespace Chime.Scene
     {
         public Platform.MotionController Controller { get; }
         public Platform.MotionControllerHand Hand => this.Controller.Hand;
-        public Graphics.StaticModel? Model { get; }
 
         public VRPlayerController(Platform.MotionController controller, string? name) : base(name)
         {
             this.Controller = controller;
-            this.Model = this.Controller.LoadModel();
         }
 
         public override void Update(float deltaTime)
@@ -32,9 +30,20 @@ namespace Chime.Scene
         {
             base.Draw(context);
 
-            if (this.Model != null && context.RenderPass == SceneRenderPass.GBuffer)
+            if (this.Controller.Model != null && context.RenderPass == SceneRenderPass.GBuffer)
             {
-                context.Pipeline.DrawStaticModel(this.Model, this.AbsoluteTransform);
+                Matrix4x4 absoluteTransform = this.AbsoluteTransform;
+                if (this.Controller.Model.Components.Count == 0)
+                {
+                    context.Pipeline.DrawStaticModel(this.Controller.Model.BaseModel, absoluteTransform);
+                }
+                foreach (string component in this.Controller.Model.Components.Keys)
+                {
+                    if (this.Controller.Model.Components[component] is Graphics.StaticModel model)
+                    {
+                        context.Pipeline.DrawStaticModel(model, this.Controller.ComponentTransforms[component] * absoluteTransform);
+                    }
+                }
             }
         }
     }
