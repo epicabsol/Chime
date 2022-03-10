@@ -11,10 +11,13 @@ namespace Chime.Scene
     {
         public Platform.MotionController Controller { get; }
         public Platform.MotionControllerHand Hand => this.Controller.Hand;
+        public Graphics.StaticModel HandModel { get; }
 
         public VRPlayerController(Platform.MotionController controller, string? name) : base(name)
         {
             this.Controller = controller;
+
+            this.HandModel = Graphics.StaticModel.FromGLTF(this.Hand == Platform.MotionControllerHand.Left ? Chime.Properties.Resources.MinifigHandLeft : Chime.Properties.Resources.MinifigHandRight);
         }
 
         public override void Update(float deltaTime)
@@ -44,6 +47,8 @@ namespace Chime.Scene
                         context.Pipeline.DrawStaticModel(model, this.Controller.ComponentTransforms[component] * absoluteTransform);
                     }
                 }
+
+                context.Pipeline.DrawStaticModel(this.HandModel, absoluteTransform);
             }
         }
     }

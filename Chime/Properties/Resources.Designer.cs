@@ -73,6 +73,26 @@ namespace Chime.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] MinifigHandLeft {
+            get {
+                object obj = ResourceManager.GetObject("MinifigHandLeft", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] MinifigHandRight {
+            get {
+                object obj = ResourceManager.GetObject("MinifigHandRight", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] SolidColorShader {
             get {
                 object obj = ResourceManager.GetObject("SolidColorShader", resourceCulture);

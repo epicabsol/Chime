@@ -121,6 +121,12 @@
   <data name="GBufferShader" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\GBufferShader.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="MinifigHandLeft" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\MinifigHandLeft.glb;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="MinifigHandRight" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\MinifigHandRight.glb;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="SolidColorShader" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\SolidColorShader.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

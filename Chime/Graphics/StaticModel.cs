@@ -40,6 +40,36 @@ namespace Chime.Graphics
                 section.Dispose();
             }
         }
+
+        public static StaticModel FromGLTF(byte[] gltfData)
+        {
+            SharpGLTF.Schema2.ModelRoot root = SharpGLTF.Schema2.ModelRoot.ParseGLB(gltfData, null);
+
+            List<StaticModelSection> sections = new List<StaticModelSection>();
+            foreach (SharpGLTF.Schema2.Mesh mesh in root.LogicalMeshes)
+            {
+                foreach (SharpGLTF.Schema2.MeshPrimitive primitive in mesh.Primitives)
+                {
+                    IList<Vector3> positions = primitive.GetVertices("POSITION").AsVector3Array();
+                    IList<Vector3> normals = primitive.GetVertices("NORMAL").AsVector3Array();
+                    IList<Vector2> texcoords = primitive.GetVertexAccessor("TEXCOORD_0").AsVector2Array();
+
+                    StaticModelVertex[] vertices = new StaticModelVertex[positions.Count];
+                    if (primitive.DrawPrimitiveType != SharpGLTF.Schema2.PrimitiveType.TRIANGLES)
+                        throw new Exception($"Unsupported primitive type {primitive.DrawPrimitiveType} in GLTF mesh!");
+
+                    for (int i = 0; i < positions.Count; i++)
+                    {
+                        vertices[i].Position = positions[i];
+                        vertices[i].Normal = normals[i];
+                        vertices[i].TexCoord = texcoords[i];
+                    }
+
+                    sections.Add(new StaticModelSection(new Mesh<StaticModelVertex>(Program.Renderer!.Device, vertices, primitive.GetIndices().ToArray()), new Material(null, Vector3.One)));
+                }
+            }
+            return new StaticModel(sections);
+        }
     }
 
     public class StaticModelSection : IDisposable
