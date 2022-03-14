@@ -18,6 +18,11 @@ namespace Chime.Graphics
         public byte[] GBufferShaderVS { get; }
         public byte[] GBufferShaderPS { get; }
 
+        public byte[] ScreenQuadVS { get; }
+
+        public byte[] PointLightPS { get; }
+        public byte[] TonemapPS { get; }
+
         public Shaders()
         {
             this.SolidColorShaderVS = Shaders.CompileShader(Chime.Properties.Resources.SolidColorShader, VertexEntrypoint);
@@ -25,6 +30,11 @@ namespace Chime.Graphics
 
             this.GBufferShaderVS = Shaders.CompileShader(Chime.Properties.Resources.GBufferShader, VertexEntrypoint);
             this.GBufferShaderPS = Shaders.CompileShader(Chime.Properties.Resources.GBufferShader, PixelEntrypoint);
+
+            this.ScreenQuadVS = Shaders.CompileShader(Chime.Properties.Resources.ScreenQuadVS, VertexEntrypoint);
+
+            this.PointLightPS = Shaders.CompileShader(Chime.Properties.Resources.PointLightShader, PixelEntrypoint);
+            this.TonemapPS = Shaders.CompileShader(Chime.Properties.Resources.TonemapPS, PixelEntrypoint);
         }
 
         private static byte[] CompileShader(byte[] source, string entrypoint)

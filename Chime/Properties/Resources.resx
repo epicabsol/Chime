@@ -127,7 +127,16 @@
   <data name="MinifigHandRight" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\MinifigHandRight.glb;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="PointLightShader" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\PointLightShader.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ScreenQuadVS" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ScreenQuadVS.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="SolidColorShader" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\SolidColorShader.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="TonemapPS" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\TonemapPS.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

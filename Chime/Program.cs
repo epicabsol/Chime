@@ -28,9 +28,12 @@ namespace Chime
 
                     Program.Scene = new Scene.Scene();
                     Program.DesktopCamera = new Scene.PerspectiveCamera(1.0f, (float)Program.Window.Pipeline.Width / Program.Window.Pipeline.Height, 0.1f, 1000.0f, "Desktop Camera");
-                    Program.DesktopCamera.Position = new System.Numerics.Vector3(1.0f, 2.0f, 2.0f);
-                    Program.DesktopCamera.Rotation = System.Numerics.Quaternion.CreateFromAxisAngle(System.Numerics.Vector3.UnitY, 0.5f) * System.Numerics.Quaternion.CreateFromAxisAngle(System.Numerics.Vector3.UnitX, -0.5f);
+                    Program.DesktopCamera.RelativeTranslation = new System.Numerics.Vector3(1.0f, 2.0f, 2.0f);
+                    Program.DesktopCamera.RelativeRotation = System.Numerics.Quaternion.CreateFromAxisAngle(System.Numerics.Vector3.UnitY, 0.5f) * System.Numerics.Quaternion.CreateFromAxisAngle(System.Numerics.Vector3.UnitX, -0.5f);
                     Program.Scene.AddChild(Program.DesktopCamera);
+                    Program.Scene.AddChild(new Scene.Prop(Graphics.StaticModel.FromGLTF(Chime.Properties.Resources.MinifigHandRight), "Test Model (Right Hand)") { RelativeTranslation = new System.Numerics.Vector3(0, 0, -0.5f) });
+                    Chime.Scene.PointLight light = new Scene.PointLight(System.Numerics.Vector3.One) { RelativeTranslation = new System.Numerics.Vector3(0.0f, 2.0f, 0.0f) };
+                    Program.Scene.AddChild(light);
 
                     if (Program.Headset != null)
                     {
@@ -38,8 +41,14 @@ namespace Chime
 
                         Program.VRPlayer = new Scene.VRPlayer(Program.Headset, "VR Player");
                         Program.Scene.AddChild(Program.VRPlayer);
-                        //Program.VRPlayer.LeftEye.AddChild(new Scene.Grid(false) { Scale = System.Numerics.Vector3.One * 0.1f });
-                        //Program.VRPlayer.RightEye.AddChild(new Scene.Grid(false) { Scale = System.Numerics.Vector3.One * 0.1f });
+                        // TEMP: Move the test light to the controller when the A button is pressed
+                        Program.VRPlayer.LeftController.Controller.Buttons[7].ValueChanged += (s, e) =>
+                        {
+                            if (e.OldValue == false && e.NewValue == true)
+                            {
+                                light.RelativeTranslation = Program.VRPlayer.LeftController.AbsoluteTransform.Translation;
+                            }
+                        };
                     }
 
                     Program.Scene.AddChild(new Scene.Grid(true, "Test Grid"));

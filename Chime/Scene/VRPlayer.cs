@@ -40,7 +40,7 @@ namespace Chime.Scene
 
                     // TEMP: Toss a grid so we can see the controller
                     Grid grid = new Grid(false);
-                    grid.Scale = new Vector3(0.1f, 0.1f, 0.1f);
+                    grid.RelativeScale = new Vector3(0.1f, 0.1f, 0.1f);
                     controller.AddChild(grid);
 
                     if (controller.Hand == Platform.MotionControllerHand.Left)
@@ -59,8 +59,8 @@ namespace Chime.Scene
             base.Update(deltaTime);
 
             Matrix4x4.Decompose(Headset.TrackedTransform.Value, out _, out Quaternion rotation, out Vector3 translation);
-            this.HeadsetObject.Position = translation;
-            this.HeadsetObject.Rotation = rotation;
+            this.HeadsetObject.RelativeTranslation = translation;
+            this.HeadsetObject.RelativeRotation = rotation;
         }
     }
 }

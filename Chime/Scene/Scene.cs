@@ -11,9 +11,13 @@ namespace Chime.Scene
     {
         Unknown,
         /// <summary>
-        /// PBR geometry
+        /// PBR geometry is drawn into the GBuffer
         /// </summary>
         GBuffer,
+        /// <summary>
+        /// Light is accumulated using the geometry information in the GBuffer
+        /// </summary>
+        Lighting,
         /// <summary>
         /// Transparent VFX
         /// </summary>
@@ -54,13 +58,15 @@ namespace Chime.Scene
                 perspective.AspectRatio = (float)pipeline.Width / pipeline.Height;
             }
             Matrix4x4.Invert(camera.AbsoluteTransform, out Matrix4x4 viewMatrix);
-            pipeline.BeginGBuffer(viewMatrix, camera.ProjectionMatrix);
+            pipeline.BeginGBuffer(viewMatrix, camera.ProjectionMatrix, camera.NearClip, camera.FarClip);
             this.Draw(new ObjectDrawContext(pipeline, camera, SceneRenderPass.GBuffer));
 
             // Shade objects from GBuffer
-            pipeline.ShadeGBuffer();
+            pipeline.BeginLighting();
+            this.Draw(new ObjectDrawContext(pipeline, camera, SceneRenderPass.Lighting));
 
-            // Draw VFX
+            // Draw effects
+            pipeline.BeginEffects();
             this.Draw(new ObjectDrawContext(pipeline, camera, SceneRenderPass.Effects));
 
             // Postprocessing

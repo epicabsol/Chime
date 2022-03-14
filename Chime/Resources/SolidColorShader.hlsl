@@ -13,6 +13,7 @@ cbuffer SceneConstants : register(b0) {
 	float4x4 ModelMatrix;
 	float4x4 ViewMatrix;
 	float4x4 ProjectionMatrix;
+	float4x4 InverseProjectionMatrix;
 };
 
 PS_IN VS_Main(VS_IN input) {

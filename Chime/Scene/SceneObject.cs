@@ -10,12 +10,12 @@ namespace Chime.Scene
     public class SceneObject : IDisposable
     {
         public string Name { get; set; }
-        public Vector3 Position { get; set; }
-        public Quaternion Rotation { get; set; } = Quaternion.Identity;
-        public Vector3 Scale { get; set; } = Vector3.One;
+        public Vector3 RelativeTranslation { get; set; }
+        public Quaternion RelativeRotation { get; set; } = Quaternion.Identity;
+        public Vector3 RelativeScale { get; set; } = Vector3.One;
 
         // TODO: Verify this order!
-        public Matrix4x4 RelativeTransform => Matrix4x4.CreateScale(this.Scale) * Matrix4x4.CreateFromQuaternion(this.Rotation) * Matrix4x4.CreateTranslation(this.Position);
+        public Matrix4x4 RelativeTransform => Matrix4x4.CreateScale(this.RelativeScale) * Matrix4x4.CreateFromQuaternion(this.RelativeRotation) * Matrix4x4.CreateTranslation(this.RelativeTranslation);
         public Matrix4x4 AbsoluteTransform
         {
             get

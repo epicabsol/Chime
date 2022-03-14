@@ -93,9 +93,39 @@ namespace Chime.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] PointLightShader {
+            get {
+                object obj = ResourceManager.GetObject("PointLightShader", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] ScreenQuadVS {
+            get {
+                object obj = ResourceManager.GetObject("ScreenQuadVS", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] SolidColorShader {
             get {
                 object obj = ResourceManager.GetObject("SolidColorShader", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] TonemapPS {
+            get {
+                object obj = ResourceManager.GetObject("TonemapPS", resourceCulture);
                 return ((byte[])(obj));
             }
         }

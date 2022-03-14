@@ -25,8 +25,8 @@ namespace Chime.Scene
             base.Update(deltaTime);
 
             Matrix4x4.Decompose(this.Controller.TrackedTransform.Value, out _, out Quaternion rotation, out Vector3 translation);
-            this.Position = translation;
-            this.Rotation = rotation;
+            this.RelativeTranslation = translation;
+            this.RelativeRotation = rotation;
         }
 
         public override void Draw(ObjectDrawContext context)
