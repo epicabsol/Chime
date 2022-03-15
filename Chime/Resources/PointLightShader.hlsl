@@ -77,7 +77,8 @@ float4 PS_Main(PS_IN input) : SV_Target0 {
 	float4 normalMetallic = NormalMetallicBuffer.SampleLevel(GBufferSampler, input.TexCoord, 0);
 
 	float3 N = normalize(normalMetallic.xyz); // Surface normal in view space
-	float3 V = float3(0.0, 0.0, 1.0);
+	//float3 V = float3(0.0, 0.0, 1.0);
+	float3 V = normalize(-position);
 	float3 L = normalize(LightPosition - position);
 	float3 H = normalize(V + L);
 

@@ -46,6 +46,7 @@ namespace Chime.Graphics
         public DepthStencilState StandardDepthStencilState { get; }
         public RasterizerState StandardRasterizerState { get; }
         public BlendState AdditiveBlendState { get; }
+        public SamplerState DefaultSamplerState { get; }
 
         private SharpDX.Direct3D11.Buffer SceneConstantBuffer { get; set; }
         private SceneConstants SceneConstantValues;
@@ -93,6 +94,8 @@ namespace Chime.Graphics
             BlendStateDescription additiveBSDesc = new BlendStateDescription();
             additiveBSDesc.RenderTarget[0] = new RenderTargetBlendDescription(true, BlendOption.One, BlendOption.One, BlendOperation.Add, BlendOption.One, BlendOption.One, BlendOperation.Add, ColorWriteMaskFlags.All);
             this.AdditiveBlendState = new BlendState(Program.Renderer.Device, additiveBSDesc);
+            this.DefaultSamplerState = new SamplerState(Program.Renderer.Device, new SamplerStateDescription() { AddressU = TextureAddressMode.Wrap, AddressV = TextureAddressMode.Wrap, AddressW = TextureAddressMode.Wrap, BorderColor = new SharpDX.Mathematics.Interop.RawColor4(0, 0, 0, 0), ComparisonFunction = Comparison.Always, Filter = Filter.MinMagMipLinear });
+            Program.Renderer.ImmediateContext.PixelShader.SetSampler(0, this.DefaultSamplerState);
 
             this.SceneConstantBuffer = new SharpDX.Direct3D11.Buffer(Program.Renderer.Device, new BufferDescription(System.Runtime.InteropServices.Marshal.SizeOf<SceneConstants>(), ResourceUsage.Dynamic, BindFlags.ConstantBuffer, CpuAccessFlags.Write, ResourceOptionFlags.None, 0));
             this.PointLightConstantBuffer = new SharpDX.Direct3D11.Buffer(Program.Renderer.Device, new BufferDescription(System.Runtime.InteropServices.Marshal.SizeOf<PointLightConstants>(), ResourceUsage.Dynamic, BindFlags.ConstantBuffer, CpuAccessFlags.Write, ResourceOptionFlags.None, 0));
@@ -101,7 +104,7 @@ namespace Chime.Graphics
             this.SolidColorVertexShader = new VertexShader(Program.Renderer.Device, Program.Renderer.Shaders.SolidColorShaderVS);
             this.SolidColorPixelShader = new PixelShader(Program.Renderer.Device, Program.Renderer.Shaders.SolidColorShaderPS);
 
-            this.GBufferInputLayout = new InputLayout(Program.Renderer.Device, Program.Renderer.Shaders.GBufferShaderVS, new InputElement[] { new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0), new InputElement("NORMAL", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0), new InputElement("TEXCOORD", 0, SharpDX.DXGI.Format.R32G32_Float, 0) });
+            this.GBufferInputLayout = new InputLayout(Program.Renderer.Device, Program.Renderer.Shaders.GBufferShaderVS, new InputElement[] { new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0), new InputElement("NORMAL", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0), new InputElement("TEXCOORD", 0, SharpDX.DXGI.Format.R32G32_Float, 0), new InputElement("TANGENT", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 0) });
             this.GBufferVertexShader = new VertexShader(Program.Renderer.Device, Program.Renderer.Shaders.GBufferShaderVS);
             this.GBufferPixelShader = new PixelShader(Program.Renderer.Device, Program.Renderer.Shaders.GBufferShaderPS);
 
@@ -239,6 +242,7 @@ namespace Chime.Graphics
 
             foreach (StaticModelSection section in model.Sections)
             {
+                Program.Renderer.ImmediateContext.PixelShader.SetShaderResources(0, section.Material.DiffuseTexture ?? Program.Renderer.WhiteTextureSRV, section.Material.NormalTexture ?? Program.Renderer.FlatNormalTextureSRV, section.Material.MetallicRoughnessTexture ?? Program.Renderer.DefaultRoughnessMetallicTextureSRV);
                 Program.Renderer.ImmediateContext.InputAssembler.SetVertexBuffers(0, new VertexBufferBinding(section.Mesh.VertexBuffer, System.Runtime.InteropServices.Marshal.SizeOf<StaticModelVertex>(), 0));
                 Program.Renderer.ImmediateContext.InputAssembler.SetIndexBuffer(section.Mesh.IndexBuffer, SharpDX.DXGI.Format.R32_UInt, 0);
                 Program.Renderer.ImmediateContext.DrawIndexed((int)section.Mesh.IndexCount, 0, 0);

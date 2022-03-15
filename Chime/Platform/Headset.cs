@@ -247,8 +247,9 @@ namespace Chime.Platform
                 {
                     modelIndices[i] = indices[i];
                 }
+                Graphics.StaticModel.ComputeTangents(modelVertices, modelIndices);
 
-                Graphics.StaticModelSection section = new Graphics.StaticModelSection(new Graphics.Mesh<Graphics.StaticModelVertex>(Program.Renderer!.Device, modelVertices, modelIndices), new Graphics.Material(null, Vector3.One));
+                Graphics.StaticModelSection section = new Graphics.StaticModelSection(new Graphics.Mesh<Graphics.StaticModelVertex>(Program.Renderer!.Device, modelVertices, modelIndices), new Graphics.Material(this.LoadRenderTexture(model.diffuseTextureId), Vector3.One, null, null));
 
                 OpenVR.OpenVR.RenderModels.FreeRenderModel(modelPointer);
 
@@ -257,6 +258,28 @@ namespace Chime.Platform
             else
             {
                 throw new Exception($"Model load error is {error}!");
+            }
+        }
+
+        public unsafe ShaderResourceView LoadRenderTexture(int textureID)
+        {
+            EVRRenderModelError error = EVRRenderModelError.Loading;
+
+            IntPtr texturePointer = IntPtr.Zero;
+
+            while (error == EVRRenderModelError.Loading)
+            {
+                error = OpenVR.OpenVR.RenderModels.LoadTextureD3D11_Async(textureID, Program.Renderer!.Device.NativePointer, ref texturePointer);
+            }
+
+            if (error == EVRRenderModelError.None)
+            {
+                Texture2D texture = new Texture2D(texturePointer);
+                return new ShaderResourceView(Program.Renderer!.Device, texture);
+            }
+            else
+            {
+                throw new Exception($"Texture load error is {error}!");
             }
         }
 

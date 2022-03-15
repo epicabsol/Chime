@@ -63,6 +63,16 @@ namespace Chime.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] DamagedHelmet {
+            get {
+                object obj = ResourceManager.GetObject("DamagedHelmet", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] GBufferShader {
             get {
                 object obj = ResourceManager.GetObject("GBufferShader", resourceCulture);
@@ -116,6 +126,16 @@ namespace Chime.Properties {
         internal static byte[] SolidColorShader {
             get {
                 object obj = ResourceManager.GetObject("SolidColorShader", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] SuzannePBR {
+            get {
+                object obj = ResourceManager.GetObject("SuzannePBR", resourceCulture);
                 return ((byte[])(obj));
             }
         }

@@ -10,13 +10,17 @@ namespace Chime.Graphics
 {
     public class Material
     {
-        public ShaderResourceView DiffuseTexture { get; }
+        public ShaderResourceView? DiffuseTexture { get; }
         public Vector3 DiffuseTint { get; }
+        public ShaderResourceView? NormalTexture { get; }
+        public ShaderResourceView? MetallicRoughnessTexture { get; }
 
-        public Material(ShaderResourceView diffuseTexture, Vector3 diffuseTint)
+        public Material(ShaderResourceView? diffuseTexture, Vector3 diffuseTint, ShaderResourceView? normalTexture, ShaderResourceView? metallicRoughnessTexture)
         {
             this.DiffuseTexture = diffuseTexture;
             this.DiffuseTint = diffuseTint;
+            this.NormalTexture = normalTexture;
+            this.MetallicRoughnessTexture = metallicRoughnessTexture;
         }
     }
 }
