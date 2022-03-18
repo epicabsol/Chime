@@ -10,12 +10,32 @@ namespace Chime.Scene
     public class SceneObject : IDisposable
     {
         public string Name { get; set; }
-        public Vector3 RelativeTranslation { get; set; }
-        public Quaternion RelativeRotation { get; set; } = Quaternion.Identity;
-        public Vector3 RelativeScale { get; set; } = Vector3.One;
+        public virtual Vector3 RelativeTranslation { get; set; }
+        public virtual Quaternion RelativeRotation { get; set; } = Quaternion.Identity;
+        public virtual Vector3 RelativeScale { get; set; } = Vector3.One;
 
         // TODO: Verify this order!
-        public Matrix4x4 RelativeTransform => Matrix4x4.CreateScale(this.RelativeScale) * Matrix4x4.CreateFromQuaternion(this.RelativeRotation) * Matrix4x4.CreateTranslation(this.RelativeTranslation);
+        public Matrix4x4 RelativeTransform
+        {
+            get
+            {
+                return Matrix4x4.CreateScale(this.RelativeScale) * Matrix4x4.CreateFromQuaternion(this.RelativeRotation) * Matrix4x4.CreateTranslation(this.RelativeTranslation);
+            }
+            set
+            {
+                if (Matrix4x4.Decompose(value, out Vector3 scale, out Quaternion rotation, out Vector3 translation))
+                {
+                    this.RelativeScale = scale;
+                    this.RelativeRotation = rotation;
+                    this.RelativeTranslation = translation;
+                }
+                else
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), "The given transform was not decomposable into translation, rotation, and scaling!");
+                }
+            }
+        }
+
         public Matrix4x4 AbsoluteTransform
         {
             get
@@ -28,6 +48,35 @@ namespace Chime.Scene
                     parent = parent.Parent;
                 }
                 return result;
+            }
+            set
+            {
+                Matrix4x4 parentInverse = Matrix4x4.Identity;
+                if (this.Parent != null)
+                {
+                    if (!Matrix4x4.Invert(this.Parent.AbsoluteTransform, out parentInverse))
+                    {
+                        throw new Exception("Could not invert parent transform!");
+                    }
+                }
+                this.RelativeTransform = value * parentInverse;
+            }
+        }
+
+        public Scene? Scene
+        {
+            get
+            {
+                SceneObject sceneObject = this;
+                while (sceneObject.Parent != null)
+                {
+                    if (sceneObject.Parent is Scene scene)
+                    {
+                        return scene;
+                    }
+                    sceneObject = sceneObject.Parent;
+                }
+                return sceneObject as Scene;
             }
         }
 
@@ -50,6 +99,7 @@ namespace Chime.Scene
             this.ChildObjects.Add(child);
             child.Parent = this;
             this.OnChildAdded(child);
+            child.OnAncestorChanged(child, null, this);
         }
 
         public void RemoveChild(SceneObject child)
@@ -57,6 +107,7 @@ namespace Chime.Scene
             this.ChildObjects.Remove(child);
             child.Parent = null;
             this.OnChildRemoved(child);
+            child.OnAncestorChanged(child, this, null);
         }
 
         protected virtual void OnChildAdded(SceneObject child)
@@ -67,6 +118,14 @@ namespace Chime.Scene
         protected virtual void OnChildRemoved(SceneObject child)
         {
 
+        }
+
+        protected virtual void OnAncestorChanged(SceneObject sceneObject, SceneObject? oldParent, SceneObject? newParent)
+        {
+            foreach (SceneObject child in this.ChildObjects)
+            {
+                child.OnAncestorChanged(sceneObject, oldParent, newParent);
+            }
         }
         #endregion
 

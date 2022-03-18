@@ -31,8 +31,8 @@ namespace Chime
                     Program.DesktopCamera.RelativeTranslation = new System.Numerics.Vector3(1.0f, 2.0f, 2.0f);
                     Program.DesktopCamera.RelativeRotation = System.Numerics.Quaternion.CreateFromAxisAngle(System.Numerics.Vector3.UnitY, 0.5f) * System.Numerics.Quaternion.CreateFromAxisAngle(System.Numerics.Vector3.UnitX, -0.5f);
                     Program.Scene.AddChild(Program.DesktopCamera);
-                    Program.Scene.AddChild(new Scene.Prop(Graphics.StaticModel.FromGLTF(Chime.Properties.Resources.SuzannePBR), "Test Model (SuzannePBR)") { RelativeTranslation = new System.Numerics.Vector3(0, 1, -3) });
-                    Program.Scene.AddChild(new Scene.Prop(Graphics.StaticModel.FromGLTF(Chime.Properties.Resources.DamagedHelmet), "Test Model (DamagedHelmet)") { RelativeTranslation = new System.Numerics.Vector3(0, 1.5f, -0.5f), RelativeScale = System.Numerics.Vector3.One * 0.1f, RelativeRotation = System.Numerics.Quaternion.CreateFromAxisAngle(System.Numerics.Vector3.UnitX, 0.0f) });
+                    Program.Scene.AddChild(new Scene.Prop(Graphics.StaticModel.FromGLTF(Chime.Properties.Resources.SuzannePBR), new BulletSharp.SphereShape(0.75f), 1.0f, "Test Model (SuzannePBR)") { RelativeTranslation = new System.Numerics.Vector3(0, 3, -3) });
+                    Program.Scene.AddChild(new Scene.Prop(Graphics.StaticModel.FromGLTF(Chime.Properties.Resources.DamagedHelmet), new BulletSharp.SphereShape(0.75f), 1.0f, "Test Model (DamagedHelmet)") { RelativeTranslation = new System.Numerics.Vector3(0, 6.5f, -0.5f), RelativeScale = System.Numerics.Vector3.One * 0.1f, RelativeRotation = System.Numerics.Quaternion.CreateFromAxisAngle(System.Numerics.Vector3.UnitX, 0.0f) });
                     Chime.Scene.PointLight light = new Scene.PointLight(System.Numerics.Vector3.One) { RelativeTranslation = new System.Numerics.Vector3(0.0f, 2.0f, 0.0f) };
                     Program.Scene.AddChild(light);
 
@@ -78,6 +78,8 @@ namespace Chime
 
             Program.Scene.Update(e.DeltaTime);
 
+            Program.Scene.DebugDraw.Commit();
+
             Program.Scene.Render(Program.Window.Pipeline, Program.DesktopCamera);
             Program.Window.SwapChain.Present(0, SharpDX.DXGI.PresentFlags.None);
 
@@ -87,6 +89,7 @@ namespace Chime
                 Program.Scene.Render(Program.Headset.RightEyePipeline, Program.VRPlayer.RightEye);
                 Program.Headset.PresentEyes();
             }
+            Program.Scene.DebugDraw.Flush();
         }
     }
 }

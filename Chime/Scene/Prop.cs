@@ -6,13 +6,14 @@ using System.Threading.Tasks;
 
 namespace Chime.Scene
 {
-    public class Prop : SceneObject
+    public class Prop : PhysicsObject
     {
         public Graphics.StaticModel Model { get; }
 
-        public Prop(Graphics.StaticModel model, string? name = null) : base(name)
+        public Prop(Graphics.StaticModel model, BulletSharp.CollisionShape collisionShape, float mass, string? name = null) : base(collisionShape, mass, name)
         {
             this.Model = model;
+            this.RigidBody.Restitution = 0.5f;
         }
 
         public override void Draw(ObjectDrawContext context)

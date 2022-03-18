@@ -225,6 +225,23 @@ namespace Chime.Graphics
             Program.Renderer.ImmediateContext.DrawIndexed((int)mesh.IndexCount, 0, 0);
         }
 
+        public void DrawDebugLines(SharpDX.Direct3D11.Buffer vertexBuffer, int lineCount)
+        {
+            if (Program.Renderer == null)
+                return;
+
+            this.SceneConstantValues.ModelMatrix = Matrix4x4.Identity; // Don't need to transpose an identity matrix =D
+            this.UpdateConstantBuffer(this.SceneConstantBuffer, ref this.SceneConstantValues);
+
+            Program.Renderer.ImmediateContext.InputAssembler.InputLayout = this.SolidColorInputLayout;
+            Program.Renderer.ImmediateContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.LineList;
+            Program.Renderer.ImmediateContext.InputAssembler.SetVertexBuffers(0, new VertexBufferBinding(vertexBuffer, System.Runtime.InteropServices.Marshal.SizeOf<SolidColorVertex>(), 0));
+            Program.Renderer.ImmediateContext.VertexShader.Set(this.SolidColorVertexShader);
+            Program.Renderer.ImmediateContext.VertexShader.SetConstantBuffer(0, this.SceneConstantBuffer);
+            Program.Renderer.ImmediateContext.PixelShader.Set(this.SolidColorPixelShader);
+            Program.Renderer.ImmediateContext.Draw(lineCount * 2, 0);
+        }
+
         public void DrawPointLight(Vector3 color, Vector3 position)
         {
             this.PointLightConstantValues.LightColor = color;

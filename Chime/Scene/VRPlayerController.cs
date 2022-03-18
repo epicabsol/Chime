@@ -27,6 +27,20 @@ namespace Chime.Scene
             Matrix4x4.Decompose(this.Controller.TrackedTransform.Value, out _, out Quaternion rotation, out Vector3 translation);
             this.RelativeTranslation = translation;
             this.RelativeRotation = rotation;
+
+            Scene? scene = this.Scene;
+            if (scene != null)
+            {
+                Matrix4x4 absoluteTransform = this.AbsoluteTransform;
+                if (scene.Raycast(absoluteTransform.Translation, absoluteTransform.Translation - absoluteTransform.GetZAxis() * 1000.0f, out SceneObject? hitObject, out _, out Vector3 hitPosition, out Vector3 hitNormal) && hitObject is PhysicsObject physicsObject)
+                {
+                    physicsObject.RigidBody.Activate();
+                    physicsObject.RigidBody.ApplyCentralForce(-hitNormal);
+
+                    scene.DebugDraw.DrawLine(this.AbsoluteTransform.Translation, hitPosition, new Vector4(1.0f, 0.0f, 1.0f, 1.0f));
+                    scene.DebugDraw.DrawLine(this.AbsoluteTransform.Translation, this.AbsoluteTransform.Translation - absoluteTransform.GetZAxis(), new Vector4(1.0f, 0.5f, 0.0f, 1.0f));
+                }
+            }
         }
 
         public override void Draw(ObjectDrawContext context)
