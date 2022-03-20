@@ -11,8 +11,8 @@ namespace Chime.Scene
     {
         public string Name { get; set; }
         public virtual Vector3 RelativeTranslation { get; set; }
-        public virtual Quaternion RelativeRotation { get; set; } = Quaternion.Identity;
-        public virtual Vector3 RelativeScale { get; set; } = Vector3.One;
+        public virtual Quaternion RelativeRotation { get; set; }
+        public virtual Vector3 RelativeScale { get; set; }
 
         // TODO: Verify this order!
         public Matrix4x4 RelativeTransform
@@ -80,9 +80,12 @@ namespace Chime.Scene
             }
         }
 
-        public SceneObject(string? name = null)
+        public SceneObject(string? name = null, Vector3? relativeTranslation = null, Quaternion? relativeRotation = null, Vector3? relativeScale = null)
         {
             this.Name = name ?? this.GetType().Name;
+            this.RelativeTranslation = relativeTranslation ?? Vector3.Zero;
+            this.RelativeRotation = relativeRotation ?? Quaternion.Identity;
+            this.RelativeScale = relativeScale ?? Vector3.One;
         }
 
         #region Hierarchy Management
@@ -137,7 +140,7 @@ namespace Chime.Scene
             }
         }
 
-        public virtual void Draw(ObjectDrawContext context)
+        public virtual void Draw(DrawContext context)
         {
             foreach (SceneObject child in this.Children)
             {

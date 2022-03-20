@@ -11,14 +11,14 @@ namespace Chime.Scene
     {
         public Vector3 Color { get; set; }
 
-        public PointLight(Vector3 color, string? name = null) : base(name)
+        public PointLight(Vector3 color, string? name = null, Vector3? relativeTranslation = null) : base(name, relativeTranslation)
         {
             this.Color = color;
 
             this.AddChild(new Grid(false));
         }
 
-        public override void Draw(ObjectDrawContext context)
+        public override void Draw(DrawContext context)
         {
             base.Draw(context);
 

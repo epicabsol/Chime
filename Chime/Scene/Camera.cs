@@ -13,7 +13,7 @@ namespace Chime.Scene
         public float NearClip { get; set; }
         public float FarClip { get; set; }
 
-        public Camera(float nearClip, float farClip, string? name = null) : base(name)
+        public Camera(float nearClip, float farClip, string? name = null, Vector3? relativeTranslation = null, Quaternion? relativeRotation = null) : base(name, relativeTranslation, relativeRotation)
         {
             this.NearClip = nearClip;
             this.FarClip = farClip;
@@ -27,7 +27,7 @@ namespace Chime.Scene
 
         public override Matrix4x4 ProjectionMatrix => Matrix4x4.CreatePerspectiveFieldOfView(this.FOV, this.AspectRatio, this.NearClip, this.FarClip);
 
-        public PerspectiveCamera(float fov, float aspectRatio, float nearClip, float farClip, string? name = null) : base(nearClip, farClip, name)
+        public PerspectiveCamera(float fov, float aspectRatio, float nearClip, float farClip, string? name = null, Vector3? relativeTranslation = null, Quaternion? relativeRotation = null) : base(nearClip, farClip, name, relativeTranslation, relativeRotation)
         {
             this.FOV = fov;
             this.AspectRatio = aspectRatio;

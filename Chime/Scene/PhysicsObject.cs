@@ -9,6 +9,9 @@ namespace Chime.Scene
 {
     public class PhysicsObject : SceneObject
     {
+        /// <summary>
+        /// A helper object that links the transform of a physics object between Chime and Bullet.
+        /// </summary>
         private class PhysicsObjectMotionState : BulletSharp.MotionState
         {
             public SceneObject SceneObject { get; set; }
@@ -35,7 +38,7 @@ namespace Chime.Scene
             set
             {
                 base.RelativeTranslation = value;
-                this.RigidBody.WorldTransform = this.RigidBody.InterpolationWorldTransform = this.AbsoluteTransform;
+                //this.RigidBody.WorldTransform = this.RigidBody.InterpolationWorldTransform = this.AbsoluteTransform;
             } 
         }
         public override Quaternion RelativeRotation
@@ -44,7 +47,7 @@ namespace Chime.Scene
             set
             {
                 base.RelativeRotation = value;
-                this.RigidBody.WorldTransform = this.RigidBody.InterpolationWorldTransform = this.AbsoluteTransform;
+                //this.RigidBody.WorldTransform = this.RigidBody.InterpolationWorldTransform = this.AbsoluteTransform;
             }
         }
         public override Vector3 RelativeScale
@@ -53,7 +56,7 @@ namespace Chime.Scene
             set
             {
                 base.RelativeScale = value;
-                this.RigidBody.WorldTransform = this.RigidBody.InterpolationWorldTransform = this.AbsoluteTransform;
+                //this.RigidBody.WorldTransform = this.RigidBody.InterpolationWorldTransform = this.AbsoluteTransform;
             }
         }
 
@@ -68,7 +71,7 @@ namespace Chime.Scene
 
         public bool IsKinematic => this.RigidBody.InvMass == 0.0f;
 
-        public PhysicsObject(BulletSharp.CollisionShape collisionShape, float mass = 0.0f, string? name = null) : base(name)
+        public PhysicsObject(BulletSharp.CollisionShape collisionShape, float mass = 0.0f, string? name = null, Vector3? relativeTranslation = null, Quaternion? relativeRotation = null, Vector3? relativeScale = null) : base(name, relativeTranslation, relativeRotation, relativeScale)
         {
             using (BulletSharp.RigidBodyConstructionInfo info = (mass > 0.0f ? new BulletSharp.RigidBodyConstructionInfo(mass, new PhysicsObjectMotionState(this), collisionShape, collisionShape.CalculateLocalInertia(mass)) : new BulletSharp.RigidBodyConstructionInfo(mass, new PhysicsObjectMotionState(this), collisionShape)))
             {

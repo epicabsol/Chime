@@ -28,13 +28,13 @@ namespace Chime.Scene
         Overlays,
     }
 
-    public class ObjectDrawContext
+    public class DrawContext
     {
         public Graphics.DeferredPipeline Pipeline { get; }
         public Camera Camera { get; }
         public SceneRenderPass RenderPass { get; }
 
-        public ObjectDrawContext(Graphics.DeferredPipeline pipeline, Camera camera, SceneRenderPass renderPass)
+        public DrawContext(Graphics.DeferredPipeline pipeline, Camera camera, SceneRenderPass renderPass)
         {
             this.Pipeline = pipeline;
             this.Camera = camera;
@@ -79,23 +79,23 @@ namespace Chime.Scene
             }
             Matrix4x4.Invert(camera.AbsoluteTransform, out Matrix4x4 viewMatrix);
             pipeline.BeginGBuffer(viewMatrix, camera.ProjectionMatrix, camera.NearClip, camera.FarClip);
-            this.Draw(new ObjectDrawContext(pipeline, camera, SceneRenderPass.GBuffer));
+            this.Draw(new DrawContext(pipeline, camera, SceneRenderPass.GBuffer));
 
             // Shade objects from GBuffer
             pipeline.BeginLighting();
-            this.Draw(new ObjectDrawContext(pipeline, camera, SceneRenderPass.Lighting));
+            this.Draw(new DrawContext(pipeline, camera, SceneRenderPass.Lighting));
 
             // Draw effects
             pipeline.BeginEffects();
-            this.Draw(new ObjectDrawContext(pipeline, camera, SceneRenderPass.Effects));
+            this.Draw(new DrawContext(pipeline, camera, SceneRenderPass.Effects));
 
             // Postprocessing
             pipeline.PostProcess();
 
             // Overlays
             pipeline.BeginOverlays();
-            this.Draw(new ObjectDrawContext(pipeline, camera, SceneRenderPass.Overlays));
-            this.DebugDraw.Draw(new ObjectDrawContext(pipeline, camera, SceneRenderPass.Overlays));
+            this.Draw(new DrawContext(pipeline, camera, SceneRenderPass.Overlays));
+            this.DebugDraw.Draw(new DrawContext(pipeline, camera, SceneRenderPass.Overlays));
         }
 
         public override void Update(float deltaTime)

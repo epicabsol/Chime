@@ -18,7 +18,7 @@ namespace Chime.Scene
         public VRPlayerController? RightController { get; }
         public IReadOnlyList<VRPlayerController> Controllers { get; }
 
-        public VRPlayer(Platform.Headset headset, string? name = null) : base(name)
+        public VRPlayer(Platform.Headset headset, string? name = null, Vector3? relativeTranslation = null, Quaternion? relativeRotation = null, Vector3? relativeScale = null) : base(name, relativeTranslation, relativeRotation, relativeScale)
         {
             this.Headset = headset;
             this.HeadsetObject = new SceneObject("VR Headset");

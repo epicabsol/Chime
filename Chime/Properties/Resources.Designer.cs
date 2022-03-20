@@ -63,6 +63,16 @@ namespace Chime.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] Chime1 {
+            get {
+                object obj = ResourceManager.GetObject("Chime1", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] DamagedHelmet {
             get {
                 object obj = ResourceManager.GetObject("DamagedHelmet", resourceCulture);

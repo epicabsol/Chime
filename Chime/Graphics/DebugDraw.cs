@@ -123,7 +123,7 @@ namespace Chime.Graphics
             }
         }
 
-        public void Draw(Scene.ObjectDrawContext drawContext)
+        public void Draw(Scene.DrawContext drawContext)
         {
             if (!this.IsCommitted)
                 throw new Exception("DebugDraw must be committed to draw!");

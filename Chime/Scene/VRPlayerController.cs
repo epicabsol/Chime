@@ -43,7 +43,7 @@ namespace Chime.Scene
             }
         }
 
-        public override void Draw(ObjectDrawContext context)
+        public override void Draw(DrawContext context)
         {
             base.Draw(context);
 

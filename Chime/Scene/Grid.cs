@@ -11,7 +11,7 @@ namespace Chime.Scene
     {
         private Graphics.Mesh<Graphics.SolidColorVertex> Mesh { get; }
 
-        public Grid(bool grid, string? name = null) : base(name)
+        public Grid(bool grid, string? name = null, Vector3? relativeTranslation = null, Quaternion? relativeRotation = null, Vector3? relativeScale = null) : base(name, relativeTranslation, relativeRotation, relativeScale)
         {
             if (Program.Renderer == null)
                 throw new Exception();
@@ -53,7 +53,7 @@ namespace Chime.Scene
             this.Mesh = new Graphics.Mesh<Graphics.SolidColorVertex>(Program.Renderer.Device, vertices.ToArray(), indices.ToArray());
         }
 
-        public override void Draw(ObjectDrawContext context)
+        public override void Draw(DrawContext context)
         {
             base.Draw(context);
 
