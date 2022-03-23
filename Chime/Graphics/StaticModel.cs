@@ -148,7 +148,7 @@ namespace Chime.Graphics
                         {
                             SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.Rgba32> resultImage = new SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.Rgba32>(image.Width, image.Height);
 
-                            // Process the 3-byte RGB data to 4-byte RGBA data, because GPUs do not support 24-byte texture formats
+                            // Process the 3-byte RGB data to 4-byte RGBA data, because GPUs do not support 24-bit texture formats
                             imageRgb.ProcessPixelRows(resultImage, (accessor1, accessor2) =>
                             {
                                 for (int y = 0; y < accessor1.Height; y++)

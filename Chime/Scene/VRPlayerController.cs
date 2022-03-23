@@ -12,12 +12,48 @@ namespace Chime.Scene
         public Platform.MotionController Controller { get; }
         public Platform.MotionControllerHand Hand => this.Controller.Hand;
         public Graphics.StaticModel HandModel { get; }
+        private Graphics.StaticModel ProjectileModel { get; }
 
         public VRPlayerController(Platform.MotionController controller, string? name) : base(name)
         {
             this.Controller = controller;
 
             this.HandModel = Graphics.StaticModel.FromGLTF(this.Hand == Platform.MotionControllerHand.Left ? Chime.Properties.Resources.MinifigHandLeft : Chime.Properties.Resources.MinifigHandRight);
+            this.ProjectileModel = Graphics.StaticModel.FromGLTF(Chime.Properties.Resources.Chime1);
+
+            // Apply an impulse to the rigidbody being pointed at when the A button is pressed
+            this.Controller.Buttons[7].ValueChanged += (sender, args) =>
+            {
+                if (args.NewValue && !args.OldValue)
+                {
+                    Scene? scene = this.Scene;
+                    if (scene != null)
+                    {
+                        Matrix4x4 absoluteTransform = this.AbsoluteTransform;
+                        if (scene.Raycast(absoluteTransform.Translation, absoluteTransform.Translation - absoluteTransform.GetZAxis() * 1000.0f, out SceneObject? hitObject, out _, out Vector3 hitPosition, out Vector3 hitNormal) && hitObject is PhysicsObject physicsObject)
+                        {
+                            physicsObject.RigidBody.Activate();
+                            physicsObject.RigidBody.ApplyCentralImpulse(-hitNormal);
+                        }
+                    }
+                }
+            };
+
+            // Spawn a new projectile when the B button is pressed
+            this.Controller.Buttons[32].ValueChanged += (sender, args) =>
+            {
+                if (args.NewValue && !args.OldValue)
+                {
+                    Scene? scene = this.Scene;
+                    if (scene != null)
+                    {
+                        Matrix4x4 absoluteTransform = this.AbsoluteTransform;
+                        Prop newProp = new Prop(this.ProjectileModel, new BulletSharp.CylinderShape(new Vector3(0.1f, 0.35f, 0.1f)), 1.0f, "Test Model (Chime1)", absoluteTransform.Translation);
+                        scene.AddChild(newProp);
+                        newProp.Velocity = -absoluteTransform.GetZAxis() * 6.0f;
+                    }
+                }
+            };
         }
 
         public override void Update(float deltaTime)
@@ -34,9 +70,6 @@ namespace Chime.Scene
                 Matrix4x4 absoluteTransform = this.AbsoluteTransform;
                 if (scene.Raycast(absoluteTransform.Translation, absoluteTransform.Translation - absoluteTransform.GetZAxis() * 1000.0f, out SceneObject? hitObject, out _, out Vector3 hitPosition, out Vector3 hitNormal) && hitObject is PhysicsObject physicsObject)
                 {
-                    physicsObject.RigidBody.Activate();
-                    physicsObject.RigidBody.ApplyCentralForce(-hitNormal);
-
                     scene.DebugDraw.DrawLine(this.AbsoluteTransform.Translation, hitPosition, new Vector4(1.0f, 0.0f, 1.0f, 1.0f));
                     scene.DebugDraw.DrawLine(this.AbsoluteTransform.Translation, this.AbsoluteTransform.Translation - absoluteTransform.GetZAxis(), new Vector4(1.0f, 0.5f, 0.0f, 1.0f));
                 }
