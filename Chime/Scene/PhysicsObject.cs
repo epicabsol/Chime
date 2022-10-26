@@ -61,6 +61,7 @@ namespace Chime.Scene
         }
 
         public BulletSharp.RigidBody RigidBody { get; }
+        private PhysicsObjectMotionState MotionState { get; }
         private bool IsInScene { get; set; }
 
         public Vector3 Velocity
@@ -73,7 +74,8 @@ namespace Chime.Scene
 
         public PhysicsObject(BulletSharp.CollisionShape collisionShape, float mass = 0.0f, string? name = null, Vector3? relativeTranslation = null, Quaternion? relativeRotation = null, Vector3? relativeScale = null) : base(name, relativeTranslation, relativeRotation, relativeScale)
         {
-            using (BulletSharp.RigidBodyConstructionInfo info = (mass > 0.0f ? new BulletSharp.RigidBodyConstructionInfo(mass, new PhysicsObjectMotionState(this), collisionShape, collisionShape.CalculateLocalInertia(mass)) : new BulletSharp.RigidBodyConstructionInfo(mass, new PhysicsObjectMotionState(this), collisionShape)))
+            this.MotionState = new PhysicsObjectMotionState(this);
+            using (BulletSharp.RigidBodyConstructionInfo info = (mass > 0.0f ? new BulletSharp.RigidBodyConstructionInfo(mass, this.MotionState, collisionShape, collisionShape.CalculateLocalInertia(mass)) : new BulletSharp.RigidBodyConstructionInfo(mass, this.MotionState, collisionShape)))
             {
                 info.StartWorldTransform = this.AbsoluteTransform;
                 this.RigidBody = new BulletSharp.RigidBody(info);
@@ -118,6 +120,7 @@ namespace Chime.Scene
             base.OnDispose(disposing);
 
             this.RigidBody.Dispose();
+            this.MotionState.Dispose();
         }
     }
 }
